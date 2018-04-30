@@ -23,6 +23,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -35,6 +36,9 @@ public class EntityRepository{
 	private static final String categoryClass = "class";
 	private static final String categoryProperty = "property";
 	private static final String categoryEntity = "entity";
+	
+	@Autowired
+	private SparqlHandler sparqlHandler;
 	
 	@Autowired
 	ElasticSearchRepositoryInterface elasticSearchRepositoryInterface;
@@ -127,7 +131,8 @@ public class EntityRepository{
 		nativeSearchQueryBuilder.withQuery(QueryBuilders.matchQuery(strType , query)).withPageable(new PageRequest(0, 100));
 		
 		SearchQuery searchQuery = nativeSearchQueryBuilder.build();
-		List<Entity> entityList = elasticSearchRepositoryInterface.search(searchQuery).getContent();
+		Page<Entity> pageEntity = elasticSearchRepositoryInterface.search(searchQuery);
+		List<Entity> entityList = pageEntity.getContent();
 		return createResponse(entityList);
 	}
 	
@@ -155,7 +160,6 @@ public class EntityRepository{
 		ArrayList<Entity> entity_list = null;
 		switch(requestType) {
 			case URI : {
-				SparqlHandler sparqlHandler = new SparqlHandler();
 				entity_list = sparqlHandler.fetchFromSparqlEndPoint(request);
 			    elasticSearchRepositoryInterface.save(entity_list);
 				log.warn("Fetch and Index Properties");
