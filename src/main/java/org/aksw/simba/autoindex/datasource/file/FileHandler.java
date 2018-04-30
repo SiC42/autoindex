@@ -15,7 +15,8 @@ import org.apache.jena.riot.lang.PipedRDFStream;
 import org.apache.jena.riot.lang.PipedTriplesStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.stereotype.Component;
+@Component
 public class FileHandler{
 	private static final Logger log = LoggerFactory
             .getLogger(FileHandler.class);

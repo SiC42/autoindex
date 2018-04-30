@@ -96,6 +96,8 @@ public class Request{
 			this.requestType = RequestType.URI;
 		else if (requestType.compareTo("filePath") == 0  || requestType.compareTo("1") == 0) 
 			this.requestType = RequestType.RDF_FILE;
+		else if (requestType.compareTo("localdatabase") == 0  || requestType.compareTo("2") == 0) 
+			this.requestType = RequestType.LOCAL_DB;
 		else 
 			this.requestType = RequestType.NONE;
 	}

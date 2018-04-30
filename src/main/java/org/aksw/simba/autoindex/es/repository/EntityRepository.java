@@ -41,6 +41,9 @@ public class EntityRepository{
 	private SparqlHandler sparqlHandler;
 	
 	@Autowired
+	private FileHandler fileHandler;
+	
+	@Autowired
 	ElasticSearchRepositoryInterface elasticSearchRepositoryInterface;
 	
 	@Autowired
@@ -155,6 +158,7 @@ public class EntityRepository{
 		if(useLocalDataSource) { 
 			//Read from Database-ms
 			log.warn("Index from Database-MS, Not implemented yet");
+			response.setBoolean(false);
 			return response;
 		}
 		ArrayList<Entity> entity_list = null;
@@ -172,7 +176,7 @@ public class EntityRepository{
 				return response;
 			}
 			case RDF_FILE: {
-				FileHandler fileHandler = new FileHandler();
+				//FileHandler fileHandler = new FileHandler(); //Need autowiring for injecting mocks to Unit test
 				List<String> fileList = request.getFileList();
 				for (String file : fileList ) {
 					entity_list = fileHandler.indexInputFile(file);
@@ -187,8 +191,7 @@ public class EntityRepository{
 			}
 			default :{
 				log.warn("Not implemented yet");
-				response.setBoolean(false);
-				return response;
+				throw new IllegalArgumentException("Invalid Request Type");
 			}
 			
 		}

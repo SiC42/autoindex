@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aksw.simba.autoindex.datasource.file.FileHandler;
 import org.aksw.simba.autoindex.datasource.sparql.SparqlHandler;
 import org.aksw.simba.autoindex.es.model.DataClass;
 import org.aksw.simba.autoindex.es.model.Entity;
@@ -24,7 +25,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,8 +35,10 @@ public class EntityRepositoryTest{
 	private SparqlHandler sparqlHandler = Mockito.mock(SparqlHandler.class);
 	
 	@Mock
-	private ElasticSearchRepositoryInterface elasticSearchRepositoryInterface = Mockito.mock(ElasticSearchRepositoryInterface.class);
+	private FileHandler fileHandler = Mockito.mock(FileHandler.class);
 	
+	@Mock
+	private ElasticSearchRepositoryInterface elasticSearchRepositoryInterface = Mockito.mock(ElasticSearchRepositoryInterface.class);
 	
 	@Mock
 	private Page<Entity> pageEntityspy = Mockito.mock(PageImpl.class);
@@ -193,8 +195,87 @@ public class EntityRepositoryTest{
 		Mockito.doReturn(null).when(elasticSearchRepositoryInterface).save(classList);
 		Response response = entityRepository.createIndex(request);
 		assertTrue(response != null);
-		assertTrue(response.getBoolean()== true);
-		
-		
+		assertTrue(response.getBoolean()== true);	
 	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testEmptyQuerySearch() {
+		SearchRequest searchRequest = new SearchRequest();
+		searchRequest.setQuery("");
+		searchRequest.setCategory("entity");
+		searchRequest.setType("label");
+		entityRepository.search(searchRequest);
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testEmptyCategorySearch() {
+		SearchRequest searchRequest = new SearchRequest();
+		searchRequest.setQuery("Obama");
+		//searchRequest.setCategory("1234"); //Category not set
+		searchRequest.setType("label");
+		entityRepository.search(searchRequest);
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testEmptyTypeSearch() {
+		SearchRequest searchRequest = new SearchRequest();
+		searchRequest.setQuery("Obama");
+		searchRequest.setCategory("entity"); 
+		searchRequest.setType("aaa");
+		entityRepository.search(searchRequest);
+	}
+	//Not implemented yet in source
+	@Test
+	public void testCreateIndexWithLocalDataSource() throws IOException {
+		Request request = new Request();
+		request.setUrl("http://dbpedia.org/sparql");
+		request.setRequestType("URI");
+		request.setUseLocalDataSource(true);
+		request.setUserId("0000001");
+		Response response = entityRepository.createIndex(request);
+		assertTrue(response != null);
+		assertTrue(response.getBoolean()== false);	
+	}
+	//Not implemented yet in source
+	@Test
+	public void testCreateIndexWithLocalDB() throws IOException {
+		Request request = new Request();
+		request.setRequestType("localdatabase");
+		request.setUseLocalDataSource(false);
+		request.setUserId("0000001");
+		Response response = entityRepository.createIndex(request);
+		assertTrue(response != null);
+		assertTrue(response.getBoolean()== false);	
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testEmptyRequestTypeForIndex() throws IOException {
+		Request request = new Request();
+		request.setUrl("http://dbpedia.org/sparql");
+		request.setRequestType("asas"); // 
+		request.setUseLocalDataSource(false);
+		request.setUserId("0000001");
+		entityRepository.createIndex(request);
+	}
+	
+	@Test
+	public void testCreateIndexWithFileHandler() throws IOException {
+		//Add Fake entities to index
+		ArrayList<Entity> entityList = new ArrayList<Entity>();		
+		entityList.add(createEntity("Test1" , "test1@test.com"));
+		entityList.add(createEntity("Test2" , "test2@test.com"));
+		Request request = new Request();
+		request.setRequestType("filePath");
+		List<String> fileList = new ArrayList<String>();
+		fileList.add("file1.ttl");
+		request.setFileList(fileList);
+		request.setUseLocalDataSource(false);
+		request.setUserId("0000001");
+		Mockito.doReturn(entityList).when(fileHandler).indexInputFile(Mockito.anyString());
+		Mockito.doReturn(null).when(elasticSearchRepositoryInterface).save(entityList);
+		Response response = entityRepository.createIndex(request);
+		assertTrue(response != null);
+		assertTrue(response.getBoolean()== true);	
+	}
+	
 }
