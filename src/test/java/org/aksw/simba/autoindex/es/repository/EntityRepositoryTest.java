@@ -193,7 +193,11 @@ public class EntityRepositoryTest{
 		Mockito.doReturn(null).when(elasticSearchRepositoryInterface).save(propertyList);
 		Mockito.doReturn(classList).when(sparqlHandler).fetchClasses(request);
 		Mockito.doReturn(null).when(elasticSearchRepositoryInterface).save(classList);
+		
 		Response response = entityRepository.createIndex(request);
+		//verify if ES Save is called correct number of times , SParql Handler too.
+		Mockito.verify(sparqlHandler , Mockito.times(1)).fetchFromSparqlEndPoint(request);
+		Mockito.verify(elasticSearchRepositoryInterface , Mockito.times(3)).save(Mockito.any(ArrayList.class));
 		assertTrue(response != null);
 		assertTrue(response.getBoolean()== true);	
 	}
@@ -268,12 +272,15 @@ public class EntityRepositoryTest{
 		request.setRequestType("filePath");
 		List<String> fileList = new ArrayList<String>();
 		fileList.add("file1.ttl");
+		fileList.add("file2.ttl");
 		request.setFileList(fileList);
 		request.setUseLocalDataSource(false);
 		request.setUserId("0000001");
 		Mockito.doReturn(entityList).when(fileHandler).indexInputFile(Mockito.anyString());
 		Mockito.doReturn(null).when(elasticSearchRepositoryInterface).save(entityList);
 		Response response = entityRepository.createIndex(request);
+		Mockito.verify(elasticSearchRepositoryInterface , Mockito.times(2)).save(Mockito.any(ArrayList.class)); //One for each file.
+		Mockito.verify(fileHandler , Mockito.times(2)).indexInputFile(Mockito.anyString());
 		assertTrue(response != null);
 		assertTrue(response.getBoolean()== true);	
 	}
