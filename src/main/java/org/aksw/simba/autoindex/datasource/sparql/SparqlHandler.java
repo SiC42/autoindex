@@ -58,7 +58,6 @@ public class SparqlHandler {
 				 ++i;
 			 }
 			 prefixMap = Collections.unmodifiableMap(prefix);
-			 System.out.println(prefixMap.toString());
 		}
 		catch (IOException ex) {
 			ex.printStackTrace();
@@ -73,7 +72,15 @@ public class SparqlHandler {
 			}
 		}
 	}
-	
+	public String getPropertyQueryString() {
+		return propertiesString;
+	}
+	public String getClassQueryString() {
+		return classesString;
+	}
+	public String getEntityQueryString() {
+		return commandString;
+	}
 	public ArrayList<DataClass> fetchClasses(Request request){
 		ArrayList<DataClass> classList = null;
 		String baseURI = request.getUrl(); 

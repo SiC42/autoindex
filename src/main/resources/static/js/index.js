@@ -49,3 +49,52 @@ $("#btn_submitfile").click(function(){
 		alert("Error occured");
 	});
 });
+
+$(document).ready(function() {
+	$.ajax({
+		type : "POST",
+		dataType: "text",
+		url: "/getEntityQuery",
+		timeout: 100000,
+		async: false,		
+	})
+	.done(function(data){
+		document.getElementById("entity_textarea").value =data;
+	});
+	$.ajax({
+		type : "POST",
+		dataType: "text",
+		url: "/getPropertyQuery",
+		timeout: 100000,
+		async: false,		
+	})
+	.done(function(data){
+		document.getElementById("property_textarea").value =data;
+	});
+	$.ajax({
+		type : "POST",
+		dataType: "text",
+		url: "/getClassQuery",
+		timeout: 100000,
+		contentType: "application/json",
+		async: false,		
+	})
+	.done(function(data){
+		document.getElementById("class_textarea").value =data;
+	});
+	var coll = document.getElementsByClassName("collapsible");
+	var i;
+
+	for (i = 0; i < coll.length; i++) {
+	    coll[i].addEventListener("click", function() {
+	        this.classList.toggle("active");
+	        var content = this.nextElementSibling;
+	        if (content.style.display === "block") {
+	            content.style.display = "none";
+	        } else {
+	            content.style.display = "block";
+	        }
+	    });
+	}
+
+});
