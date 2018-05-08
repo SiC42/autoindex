@@ -12,10 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
-
 import javax.annotation.PostConstruct;
-
 import org.aksw.simba.autoindex.es.model.DataClass;
 import org.aksw.simba.autoindex.es.model.Entity;
 import org.aksw.simba.autoindex.es.model.Property;
@@ -72,14 +71,21 @@ public class SparqlHandler {
 			}
 		}
 	}
+	private String getPrefixString() {
+		String output = "";
+		for (Entry<String, String> entry : prefixMap.entrySet()) {
+			output += "PREFIX " + entry.getKey() + ":<" + entry.getValue() + ">\n";
+		}
+		return output;
+	}
 	public String getPropertyQueryString() {
-		return propertiesString;
+		return getPrefixString() + propertiesString;
 	}
 	public String getClassQueryString() {
-		return classesString;
+		return getPrefixString() + classesString;
 	}
 	public String getEntityQueryString() {
-		return commandString;
+		return getPrefixString() + commandString;
 	}
 	public ArrayList<DataClass> fetchClasses(Request request){
 		ArrayList<DataClass> classList = null;
